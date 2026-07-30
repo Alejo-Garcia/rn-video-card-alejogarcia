@@ -172,4 +172,51 @@ order as locally. Nothing is silenced: no `continue-on-error`, no `|| true`, no 
 
 ## How I used AI
 
-<!-- Written by hand after the build. Do not generate. -->
+<!-- Draft to review and make my own before committing. -->
+
+I used it in two sessions with different jobs, and that split is the part I would defend.
+
+**What I prompted.** I read the brief, then opened a session whose only deliverable was a
+specification — not code. I gave it the requirements and asked it to organise them, work
+through the stack, and write down everything it learned on the way: version constraints,
+failure modes, anything that cost us time. When we hit a real problem during that
+exploration, the problem got annotated into the document rather than merely fixed.
+
+We argued about the decisions that were genuinely open, and I made the calls: Expo's managed
+workflow over the bare React Native CLI, because CI then needs no native toolchain and
+`jest-expo` gives a version-matched Jest preset; the built-in `Animated` API over Reanimated,
+because the animated properties are `width` and `height`, which the native driver cannot
+touch, and Reanimated is added scope the brief rules out; the sub-minute seconds band; and a
+flat ESLint config instead of the `.eslintrc` the brief names. All four are argued in full
+above — the reasoning is mine, the writing-up was assisted.
+
+The output was an `AGENT_SPEC.md`. I then started a **fresh session on an empty repository**
+and gave it only that document. Nothing from the exploration carried over except what had
+been deliberately written down.
+
+**What it got right.** Close to all of it, in the phases the spec prescribed, with each phase
+largely landing first time. I read that as a result about the specification rather than about
+the model: because the traps had already been found and recorded, the second session never had
+to rediscover them. It pinned the exact dependency versions, followed the measure-then-animate
+design without inventing scope, and when it verified on the simulator it reproduced the
+padding-box bug on purpose rather than asserting the fix worked.
+
+**What I had to fix.**
+
+- The Expo template ships its own MIT `LICENSE`, which would have left this repository looking
+  MIT-licensed with the copyright credited to Expo. It surfaced that rather than deciding
+  alone; I had it removed and amended the spec so a future run handles it as a step.
+- Its own mutation testing found a hole in the first hook suite: 44 tests, none of which could
+  tell correct minute-rounding from double-rounding. A test was added and the commit amended.
+- One test expectation was simply wrong — it asserted that 59.5 minutes remaining reads
+  `"59m"`, when it reads `"1h"`, because `Math.round` is half-up. The code was right and the
+  test was wrong, which is the harder version of that mistake to notice.
+- The README came in well over its own length budget and took three passes to come back.
+
+**One thing I built into the spec on purpose.** The hardest diff gets an independent review in
+a fresh context, with the request scoped tightly — because an open-ended reviewer invents
+findings. It did: of what came back, the substantive half was three behaviours with no test
+that would fail if they broke, and the rest was either prescribed by the design or unverifiable
+by its own admission. Deciding what to discard was the work.
+
+<!-- [ Optional, and only I can answer it: what I would do differently next time. ] -->
