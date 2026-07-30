@@ -172,8 +172,6 @@ order as locally. Nothing is silenced: no `continue-on-error`, no `|| true`, no 
 
 ## How I used AI
 
-<!-- Draft to review and make my own before committing. -->
-
 I used it in two sessions with different jobs, and that split is the part I would defend.
 
 **What I prompted.** I read the brief, then opened a session whose only deliverable was a
@@ -218,5 +216,3 @@ a fresh context, with the request scoped tightly — because an open-ended revie
 findings. It did: of what came back, the substantive half was three behaviours with no test
 that would fail if they broke, and the rest was either prescribed by the design or unverifiable
 by its own admission. Deciding what to discard was the work.
-
-<!-- [ Optional, and only I can answer it: what I would do differently next time. ] -->
