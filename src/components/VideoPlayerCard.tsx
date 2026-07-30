@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { usePlaybackProgress } from '../hooks/usePlaybackProgress';
 
@@ -7,6 +7,7 @@ const CARD_PADDING = 16;
 const LOGO_SIZE = 44;
 const LOGO_GAP = 12;
 const DESCRIPTION_MAX_LINES = 2;
+const PROGRESS_ANIMATION_MS = 900;
 
 /** The progress fill holds no text, so no user-facing query can reach it. */
 export const PROGRESS_FILL_TEST_ID = 'video-player-card-progress-fill';
@@ -53,6 +54,28 @@ export function VideoPlayerCard({
     elapsedMinutes,
   );
 
+  // Held in state rather than a ref: the value is read during render to build
+  // the interpolation below, which is what react-hooks/refs forbids for refs.
+  // The lazy initialiser still gives one instance per mount.
+  const [progressAnimation] = useState(() => new Animated.Value(0));
+
+  useEffect(() => {
+    const animation = Animated.timing(progressAnimation, {
+      toValue: progressPercent,
+      duration: PROGRESS_ANIMATION_MS,
+      easing: Easing.out(Easing.cubic),
+      // Width is a layout property, and the native driver cannot animate those.
+      useNativeDriver: false,
+    });
+    animation.start();
+    return () => animation.stop();
+  }, [progressAnimation, progressPercent]);
+
+  const progressWidth = progressAnimation.interpolate({
+    inputRange: [0, 100],
+    outputRange: ['0%', '100%'],
+  });
+
   const toggleExpanded = useCallback(() => {
     setIsExpanded((previous) => !previous);
   }, []);
@@ -79,8 +102,8 @@ export function VideoPlayerCard({
       </View>
 
       <View style={styles.progressTrack}>
-        <View
-          style={[styles.progressFill, { width: `${progressPercent}%` }]}
+        <Animated.View
+          style={[styles.progressFill, { width: progressWidth }]}
           testID={PROGRESS_FILL_TEST_ID}
         />
       </View>
