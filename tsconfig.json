@@ -1,6 +1,11 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    // Jest globals are not picked up automatically under this TypeScript/Expo
+    // base config; without this, tsc fails on every test file. Setting "types"
+    // opts out of automatic inclusion, but React is not needed here — its types
+    // resolve through module resolution from the imports and the JSX runtime.
+    "types": ["jest"]
   }
 }
